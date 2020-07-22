@@ -5,7 +5,7 @@ CREATE TABLE tasks (
   start_time TEXT NOT NULL,
   duration TEXT,
   category TEXT NOT NULL,
-  streak TEXT,
-  start_date TIMESTAMP,
-  end_date TIMESTAMP
+  streak INTEGER,
+  start_date DATE,
+  end_date DATE
 )

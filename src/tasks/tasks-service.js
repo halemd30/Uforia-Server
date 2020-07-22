@@ -1,3 +1,5 @@
+const { reset } = require("nodemon");
+
 const TasksService = {
   getAllTasks(db) {
     return db.select("*").from("tasks");
@@ -19,6 +21,21 @@ const TasksService = {
   },
   deleteTask(db, id) {
     return db.from("tasks").where({ id }).delete();
+  },
+  updateStartTask(db, id, startTask) {
+    return db.from("tasks").where({ id }).update(startTask);
+  },
+  updateEndTask(db, id, endTask) {
+    return db.from("tasks").where({ id }).update(endTask);
+  },
+  updateStreak(db, id, streak) {
+    return db.from("tasks").where({ id }).update(streak);
+  },
+  findTaskAndReturn(db, id) {
+    return db.select("*").from("tasks").where({ id });
+  },
+  updateResetTask(db, id, reset) {
+    return db.from("tasks").where({ id }).update(reset);
   },
   serializeTask(task) {
     return {

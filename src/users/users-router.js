@@ -8,7 +8,6 @@ const { requireAuth } = require("../middleware/jwt-auth");
 
 usersRouter
   .get("/", requireAuth, (req, res) => {
-    console.log({ user: req.user });
     res.json(UsersService.serializeUser(req.user));
   })
   .post("/", (req, res, next) => {
@@ -35,8 +34,6 @@ usersRouter
             password: hashedPassword,
             phone_number,
           };
-
-          console.log(newUser);
 
           return UsersService.insertUser(req.app.get("db"), newUser).then(
             (user) => {

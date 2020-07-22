@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const TasksService = require("./tasks-service");
 const { requireAuth } = require("../middleware/jwt-auth");
+const moment = require("moment");
 //const db = req.app.get("db");
 
 const tasksRouter = express.Router();
@@ -49,9 +50,51 @@ tasksRouter.route("/:userId").get((req, res) => {
   });
 });
 
-tasksRouter.route("/:taskId").delete((req, res) => {
-  const id = parseInt(req.params.taskId);
-  TasksService.deleteTask(req.app.get("db"), id).then(res.status(204).end());
+tasksRouter
+  .route("/:taskId")
+  .delete((req, res, next) => {
+    const id = parseInt(req.params.taskId);
+    TasksService.deleteTask(req.app.get("db"), id)
+      .then(res.status(204).end())
+      .catch(next);
+  })
+  .patch((req, res, next) => {
+    const id = parseInt(req.params.taskId);
+    // const date = new Date();
+    // const dateFormat = `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
+
+    TasksService.updateStartTask(req.app.get("db"), id, {
+      start_date: new Date(),
+    })
+      .then(res.status(204).end())
+      .catch(next);
+  });
+
+tasksRouter.route("/end/:taskId").patch((req, res) => {
+  const id = req.params.taskId;
+  TasksService.updateEndTask(req.app.get("db"), id, {
+    end_date: new Date(),
+  }).then(res.status(204).end());
+});
+
+tasksRouter.route("/:taskId/modify").patch((req, res) => {
+  //req.query.streak - modify?streak=5
+  //req.params.
+  // post
+  const id = req.params.taskId;
+  TasksService.findTaskAndReturn(req.app.get("db"), id).then(([task]) => {
+    TasksService.updateStreak(req.app.get("db"), id, {
+      streak: task.streak + 1,
+    }).then(res.status(204).end());
+  });
+});
+
+tasksRouter.route("/reset/:taskId").patch((req, res) => {
+  const id = req.params.taskId;
+  TasksService.updateResetTask(req.app.get("db"), id, {
+    streak: 0,
+    start_date: null,
+  }).then(res.status(204).end());
 });
 
 module.exports = tasksRouter;
