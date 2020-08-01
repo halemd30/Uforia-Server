@@ -22,7 +22,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 
 app.get("/", (req, res, next) => {
-  res.send("stuff");
+  res.send("You've reached app.js");
 });
 
 app.use(function errorHandler(error, req, res, next) {
