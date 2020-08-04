@@ -14,13 +14,13 @@ VALUES
 
 INSERT INTO tasks (user_id, name, start_time, category, duration, streak)
 VALUES
-  (1, '5am wake up!', '5:00am', 'Waking up', null, '20 days'),
-  (1, 'Workout', '6:00am', 'Exercise', '1hr', '10 days'),
-  (1, 'Meditate', '7:00am', 'Mindfulness', '20min', '30 days'),
-  (1, 'Stick to diet plan', 'all day', 'Food', null, '0 days'),
-  (1, 'No booze', 'all day', 'No booze', null, '0 days'),
-  (1, 'Drink a gallon of water', 'all day', 'Hydration', null, '0 days'),
-  (1, 'No screens', '12:00pm', 'No tech', '3hrs', '0 days'),
-  (1, '8 hours of sleep', '9:00pm', 'sleep', null, '20 days');
+  (1, '5am wake up!', '5:00am', 'Waking up', null, '20'),
+  (1, 'Workout', '6:00am', 'Exercise', '1hr', '10'),
+  (1, 'Meditate', '7:00am', 'Mindfulness', '20min', '30'),
+  (1, 'Stick to diet plan', 'all day', 'Food', null, '0'),
+  (1, 'No booze', 'all day', 'No booze', null, '0'),
+  (1, 'Drink a gallon of water', 'all day', 'Hydration', null, '0'),
+  (1, 'No screens', '12:00pm', 'No tech', '3hrs', '0'),
+  (1, '8 hours of sleep', '9:00pm', 'sleep', null, '20');
 
 COMMIT;

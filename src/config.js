@@ -5,7 +5,9 @@ module.exports = {
   DATABASE_URL:
     process.env.DATABASE_URL ||
     "postgres://habituser:habit1234@localhost/habitapp",
+
   TEST_DATABASE_URL:
+    console.log(process.env.TEST_DATABASE_URL) ||
     process.env.TEST_DATABASE_URL ||
     "postgres://habituser:habit1234@localhost/habitapp_test",
 };
