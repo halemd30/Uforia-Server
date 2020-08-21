@@ -1,3 +1,5 @@
+// 207 lines
+
 const knex = require("knex");
 const bcrypt = require("bcryptjs");
 const app = require("../src/app");
@@ -26,8 +28,6 @@ describe("Users Endpoints", function () {
 
   describe(`POST /api/users`, () => {
     context("User Validation", () => {
-      beforeEach("insert users", () => helpers.seedUsers(db, testUsers));
-
       const requiredFields = ["username", "password", "phone_number"];
 
       requiredFields.forEach((field) => {
@@ -66,7 +66,7 @@ describe("Users Endpoints", function () {
       it(`responds 400 when password is longer than 72 characters`, () => {
         const passwordTooLong = {
           username: "test_user",
-          password: "Aasdf123",
+          password: "*".repeat(73),
           phone_number: "1231231234",
         };
 
@@ -107,21 +107,6 @@ describe("Users Endpoints", function () {
             error: "Password must not start or end with empty spaces",
           });
       });
-
-      it(`responds 400 when username is already taken`, () => {
-        const duplicateUser = {
-          username: "test_user",
-          password: "Asdf1324",
-          phone_number: "1231231234",
-        };
-
-        return supertest(app)
-          .post("/api/users")
-          .send(duplicateUser)
-          .expect(400, {
-            error: "Username already taken",
-          });
-      });
     });
 
     context("Happy path", () => {
@@ -159,6 +144,63 @@ describe("Users Endpoints", function () {
                 expect(compareMatch).to.be.true;
               })
           );
+      });
+    });
+  });
+
+  context("Given users in the database", () => {
+    beforeEach("insert users", () => helpers.seedUsers(db, testUsers));
+
+    it(`POST /api/users responds 400 when username is already taken`, () => {
+      const duplicateUser = {
+        username: testUser.username,
+        password: "Asdf1324",
+        phone_number: "1231231234",
+      };
+
+      return supertest(app).post("/api/users").send(duplicateUser).expect(400, {
+        error: "Username already taken",
+      });
+    });
+
+    it("GET /api/users responds 200 and data for that user", () => {
+      const expectedUser = testUsers.find((user) => user.id === testUser.id);
+
+      return supertest(app)
+        .get("/api/users")
+        .set("Authorization", helpers.makeAuthHeader(testUser))
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).to.have.property("id");
+          expect(res.body.username).to.eql(expectedUser.username);
+          expect(res.body.phone_number).to.eql(expectedUser.phone_number);
+        });
+    });
+
+    context("Given an xss attack", () => {
+      const { maliciousUser, expectedUser } = helpers.makeMaliciousUser();
+
+      it(`GET /api/users removes xss content`, () => {
+        const expectedUser = testUsers.find((user) => user.id === testUser.id);
+        return supertest(app)
+          .get("/api/users")
+          .set("Authorization", helpers.makeAuthHeader(testUser))
+          .expect(200)
+          .expect((res) => {
+            expect(res.body.username).to.eql(expectedUser.username);
+            expect(res.body.phone_number).to.eql(expectedUser.phone_number);
+          });
+      });
+
+      it.skip(`POST /api/users removes xss content`, () => {
+        return supertest(app)
+          .post("/api/users")
+          .send(maliciousUser)
+          .expect(201)
+          .expect((res) => {
+            expect(res.body.username).to.eql(expectedUser.username);
+            expect(res.body.phone_number).to.eql(expectedUser.phone_number);
+          });
       });
     });
   });

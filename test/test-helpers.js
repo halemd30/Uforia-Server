@@ -76,14 +76,14 @@ function cleanTables(db) {
 
 function seedUsers(db, users) {
   const preppedUsers = users.map((user) => ({
-    ...users,
+    ...user,
     password: bcrypt.hashSync(user.password, 8),
   }));
   return db
     .into("users")
-    .insert("preppedUsers")
+    .insert(preppedUsers)
     .then(() =>
-      db.raw(`SELECT setval('users_id_seq')`, [users[users.length - 1].id])
+      db.raw(`SELECT setval('users_id_seq', ?)`, [users[users.length - 1].id])
     );
 }
 
@@ -120,7 +120,7 @@ function makeMaliciousUser() {
 
 function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
   const token = jwt.sign({ user_id: user.id }, secret, {
-    subject: user.user_name,
+    subject: user.username,
     algorithm: "HS256",
   });
   return `Bearer ${token}`;
