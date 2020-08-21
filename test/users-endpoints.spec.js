@@ -192,7 +192,7 @@ describe("Users Endpoints", function () {
           });
       });
 
-      it.skip(`POST /api/users removes xss content`, () => {
+      it.only(`POST /api/users removes xss content`, () => {
         return supertest(app)
           .post("/api/users")
           .send(maliciousUser)
