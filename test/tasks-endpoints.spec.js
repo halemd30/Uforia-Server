@@ -66,7 +66,7 @@ describe('tasks endpoints', () => {
     // })
   });
 
-  it(`POST /api/tasks responds with 201 and new task`, () => {
+  it.only(`POST /api/tasks responds with 201 and new task`, () => {
     const task_id = 1;
     const newTask = {
       user_id: testUser.id,
@@ -77,7 +77,7 @@ describe('tasks endpoints', () => {
     };
 
     return supertest(app)
-      .post('/api/tasks')
+      .post(`/api/tasks`)
       .set('Authorization', helpers.makeAuthHeader(testUser))
       .send(newTask)
       .expect(201)
