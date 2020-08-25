@@ -47,6 +47,7 @@ tasksRouter
 
 tasksRouter
   .route("/:taskId")
+  .all(requireAuth)
   .delete((req, res, next) => {
     const id = parseInt(req.params.taskId);
     TasksService.deleteTask(req.app.get("db"), id)
@@ -63,28 +64,34 @@ tasksRouter
       .catch(next);
   });
 
-tasksRouter.route("/end/:taskId").patch(requireAuth, (req, res) => {
+tasksRouter.route("/end/:taskId").patch(requireAuth, (req, res, next) => {
   const id = req.params.taskId;
   TasksService.updateEndTask(req.app.get("db"), id, {
     end_date: new Date(),
-  }).then(res.status(204).end());
+  })
+    .then(res.status(204).end())
+    .catch(next);
 });
 
-tasksRouter.route("/:taskId/modify").patch(requireAuth, (req, res) => {
+tasksRouter.route("/:taskId/modify").patch(requireAuth, (req, res, next) => {
   const id = req.params.taskId;
   TasksService.findTaskAndReturn(req.app.get("db"), id).then(([task]) => {
     TasksService.updateStreak(req.app.get("db"), id, {
       streak: task.streak + 1,
-    }).then(res.status(204).end());
+    })
+      .then(res.status(204).end())
+      .catch(next);
   });
 });
 
-tasksRouter.route("/reset/:taskId").patch(requireAuth, (req, res) => {
+tasksRouter.route("/reset/:taskId").patch(requireAuth, (req, res, next) => {
   const id = req.params.taskId;
   TasksService.updateResetTask(req.app.get("db"), id, {
     streak: 0,
     start_date: null,
-  }).then(res.status(204).end());
+  })
+    .then(res.status(204).end())
+    .catch(next);
 });
 
 module.exports = tasksRouter;
