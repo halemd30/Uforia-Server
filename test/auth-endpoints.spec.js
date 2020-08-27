@@ -1,6 +1,6 @@
 const knex = require('knex');
 const jwt = require('jsonwebtoken');
-const app = require('./src/app');
+const app = require('../src/app');
 const helpers = require('./test-helpers');
 
 describe('auth endpoints', () => {
@@ -42,6 +42,54 @@ describe('auth endpoints', () => {
             error: `Missing '${field}' in request body`,
           });
       });
+    });
+
+    it(`responds 400 'invalid username or password' when bad username`, () => {
+      const invalidUsername = { username: 'nope', password: 'good' };
+
+      return supertest(app)
+        .post('/api/auth/login')
+        .send(invalidUsername)
+        .expect(400, {
+          error: 'Incorrect username or password',
+        });
+    });
+
+    it(`responds 400 'invalid username or password' when bad password`, () => {
+      const invalidPassword = {
+        username: testUser.username,
+        password: 'nope',
+      };
+
+      return supertest(app)
+        .post('/api/auth/login')
+        .send(invalidPassword)
+        .expect(400, {
+          error: 'Incorrect username or password',
+        });
+    });
+
+    it(`responds 200 and JWT auth token using secret when valid credentials`, function () {
+      this.retries(3);
+
+      const userValidCreds = {
+        username: testUser.username,
+        password: testUser.password,
+      };
+
+      const expectedToken = jwt.sign(
+        { user_id: testUser.id },
+        process.env.JWT_SECRET,
+        {
+          subject: testUser.username,
+          algorithm: 'HS256',
+        }
+      );
+
+      return supertest(app)
+        .post('/api/auth/login')
+        .send(userValidCreds)
+        .expect(200, { authToken: expectedToken });
     });
   });
 });
