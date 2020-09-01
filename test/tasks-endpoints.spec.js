@@ -31,13 +31,13 @@ describe('tasks endpoints', () => {
     });
 
     it(`GET /api/tasks responds with 200 and all of the tasks for that user`, () => {
-      const expectedTask = testTasks.filter((task) => task.user_id === testUser.id);
-      console.log(expectedTask);
+      const expectedTask = testTasks.filter(task => task.user_id === testUser.id);
+
       return supertest(app)
         .get('/api/tasks')
         .set('Authorization', helpers.makeAuthHeader(testUser))
         .expect(200)
-        .expect((res) => {
+        .expect(res => {
           expect(res.body[0]).to.have.property('id');
           expect(res.body[0].user_id).to.eql(expectedTask[0].user_id);
           expect(res.body[0].name).to.eql(expectedTask[0].name);
@@ -63,30 +63,22 @@ describe('tasks endpoints', () => {
       const newDate = {
         start_date: new Date(),
       };
-      taskToChange = testTask;
+      const expectedTask = {
+        ...testTask,
+        ...newDate,
+      };
 
       return supertest(app)
         .patch(`/api/tasks/${task_id}`)
         .set('Authorization', helpers.makeAuthHeader(testUser))
         .send(newDate)
         .expect(204)
-        .then((res) =>
+        .then(res => {
           supertest(app)
             .get(`/api/tasks/${task_id}`)
             .set('Authorization', helpers.makeAuthHeader(testUser))
-            .expect(res.body)
-            .to.have.property('id')
-            .expect(res.body.start_date)
-            .to.eql(newDate.start_date)
-            .expect(res.body.user_id)
-            .to.eql(taskToChange.user_id)
-            .expect(res.body.name)
-            .to.eql(taskToChange.name)
-            .expect(res.body.start_time)
-            .to.eql(taskToChange.start_time)
-            .expect(res.body.category)
-            .to.eql(taskToChange.category)
-        );
+            .expect(expectedTask);
+        });
     });
 
     it(`PATCH /api/tasks/end/:taskId responds with 204 and updates end_date`, () => {
@@ -94,30 +86,22 @@ describe('tasks endpoints', () => {
       const newDate = {
         end_date: new Date(),
       };
-      taskToChange = testTask;
+      const expectedTask = {
+        ...testTask,
+        ...newDate,
+      };
 
       return supertest(app)
         .patch(`/api/tasks/end/${task_id}`)
         .set('Authorization', helpers.makeAuthHeader(testUser))
         .send(newDate)
         .expect(204)
-        .then((res) =>
+        .then(res => {
           supertest(app)
             .get(`/api/tasks/end/${task_id}`)
             .set('Authorization', helpers.makeAuthHeader(testUser))
-            .expect(res.body)
-            .to.have.property('id')
-            .expect(res.body.end_date)
-            .to.eql(newDate.end_date)
-            .expect(res.body.user_id)
-            .to.eql(taskToChange.user_id)
-            .expect(res.body.name)
-            .to.eql(taskToChange.name)
-            .expect(res.body.start_time)
-            .to.eql(taskToChange.start_time)
-            .expect(res.body.category)
-            .to.eql(taskToChange.category)
-        );
+            .expect(expectedTask);
+        });
     });
 
     it(`PATCH /api/tasks/:taskId/modify responds with 204 and updates streak`, () => {
@@ -125,67 +109,47 @@ describe('tasks endpoints', () => {
       const newStreak = {
         streak: 2,
       };
-      taskToChange = testTask;
+      const expectedTask = {
+        ...testTask,
+        ...newStreak,
+      };
 
       return supertest(app)
         .patch(`/api/tasks/${task_id}/modify`)
         .set('Authorization', helpers.makeAuthHeader(testUser))
-        .send(newDate)
+        .send(newStreak)
         .expect(204)
-        .then((res) =>
+        .then(res => {
           supertest(app)
-            .get(`/api/tasks/end/${task_id}`)
+            .get(`/api/tasks/${task_id}/modify`)
             .set('Authorization', helpers.makeAuthHeader(testUser))
-            .expect(res.body)
-            .to.have.property('id')
-            .expect(res.body.streak)
-            .to.eql(newStreak.streak)
-            .expect(res.body.user_id)
-            .to.eql(taskToChange.user_id)
-            .expect(res.body.name)
-            .to.eql(taskToChange.name)
-            .expect(res.body.start_time)
-            .to.eql(taskToChange.start_time)
-            .expect(res.body.category)
-            .to.eql(taskToChange.category)
-        );
+            .expect(expectedTask);
+        });
     });
 
     it(`PATCH /api/tasks/reset/:taskId responds with 204 and updates streak and start_date`, () => {
       const task_id = 1;
-      const updatedStreak = {
+      const updatedTask = {
         streak: 0,
-      };
-      const updatedStart = {
         start_date: null,
       };
 
-      taskToChange = testTask;
+      const expectedTask = {
+        ...testTask,
+        ...updatedTask,
+      };
 
       return supertest(app)
-        .patch(`/api/tasks/${task_id}/modify`)
+        .patch(`/api/tasks/reset/${task_id}`)
         .set('Authorization', helpers.makeAuthHeader(testUser))
-        .send(newDate)
+        .send(updatedTask)
         .expect(204)
-        .then((res) =>
+        .then(res => {
           supertest(app)
-            .get(`/api/tasks/end/${task_id}`)
+            .get(`/api/tasks/reset/${task_id}`)
             .set('Authorization', helpers.makeAuthHeader(testUser))
-            .expect(res.body)
-            .to.have.property('id')
-            .expect(res.body.streak)
-            .to.eql(updatedStreak.streak)
-            .expect(res.body.start_date)
-            .to.eql(updatedStart.start_date)
-            .expect(res.body.user_id)
-            .to.eql(taskToChange.user_id)
-            .expect(res.body.name)
-            .to.eql(taskToChange.name)
-            .expect(res.body.start_time)
-            .to.eql(taskToChange.start_time)
-            .expect(res.body.category)
-            .to.eql(taskToChange.category)
-        );
+            .expect(expectedTask);
+        });
     });
   });
 
@@ -203,7 +167,7 @@ describe('tasks endpoints', () => {
       .set('Authorization', helpers.makeAuthHeader(testUser))
       .send(newTask)
       .expect(201)
-      .expect((res) => {
+      .expect(res => {
         expect(res.body).to.have.property('id');
         expect(res.body.user_id).to.eql(newTask.user_id);
         expect(res.body.name).to.eql(newTask.name);
